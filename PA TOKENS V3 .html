@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PA TOKENS</title>
+
+<style>
+body{
+margin:0;
+background:#0b0b0f;
+color:white;
+font-family:Arial;
+}
+
+.top{
+padding:12px;
+text-align:center;
+font-size:20px;
+color:#ffcc00;
+font-weight:bold;
+}
+
+.balance{
+margin:10px;
+padding:12px;
+border-radius:12px;
+background:#15151c;
+display:flex;
+justify-content:space-between;
+}
+
+.page{display:none;padding:10px;}
+.page.active{display:block;}
+
+.card{
+margin:10px;
+padding:15px;
+background:#121218;
+border-radius:15px;
+border:1px solid #222;
+}
+
+.slot-box{
+padding:20px;
+margin:10px;
+border-radius:18px;
+border:2px solid #ffcc00;
+text-align:center;
+}
+
+.reel{font-size:40px;margin:0 6px;}
+
+.bet{
+display:flex;
+margin:10px;
+gap:5px;
+}
+
+.bet button{
+flex:1;
+padding:10px;
+background:#222;
+border:none;
+color:white;
+border-radius:8px;
+}
+
+.bet input{
+flex:2;
+text-align:center;
+font-size:16px;
+border-radius:8px;
+border:none;
+}
+
+.spin{
+margin:10px;
+width:calc(100% - 20px);
+padding:15px;
+background:#2ecc71;
+border:none;
+border-radius:12px;
+font-size:18px;
+color:black;
+font-weight:bold;
+}
+
+.nav{
+position:fixed;
+bottom:0;
+left:0;
+width:100%;
+display:flex;
+background:#111;
+}
+
+.nav button{
+flex:1;
+padding:10px;
+background:none;
+border:none;
+color:white;
+font-size:11px;
+}
+
+.nav button.active{
+background:#ffcc00;
+color:black;
+}
+
+.stat{
+padding:8px;
+margin:6px 0;
+background:#0e0e14;
+border-radius:10px;
+border:1px solid #1f1f2a;
+}
+
+/* TASK DONE GREEN */
+.done{
+background:#1a3d1a !important;
+border:1px solid #2ecc71 !important;
+}
+
+/* ROULETTE */
+.wheel{
+width:160px;
+height:160px;
+border-radius:50%;
+border:3px solid #ffcc00;
+display:flex;
+align-items:center;
+justify-content:center;
+margin:auto;
+font-size:40px;
+transition:transform 3s ease-out;
+}
+
+.spinAnim{transform:rotate(1080deg);}
+</style>
+</head>
+
+<body>
+
+<div class="top">🎰 PA TOKENS</div>
+
+<div class="balance">
+<span>💰 Баланс:</span>
+<span id="bal"></span>
+</div>
+
+<!-- SLOT -->
+<div id="page1" class="page active">
+<div class="card">
+
+<h3>🎰 СЛОТ</h3>
+
+<div class="slot-box">
+<span id="r1">🍒</span>
+<span id="r2">🍒</span>
+<span id="r3">🍒</span>
+</div>
+
+<div class="bet">
+<button onclick="changeBet(-100)">-</button>
+<input id="betInput" type="number">
+<button onclick="changeBet(100)">+</button>
+<button onclick="maxBet()">MAX</button>
+</div>
+
+<button class="spin" onclick="spinSlot()">КРУТИТЬ</button>
+
+</div>
+</div>
+
+<!-- ROULETTE -->
+<div id="page2" class="page">
+<div class="card">
+
+<h3>🎲 РУЛЕТКА</h3>
+
+<div id="wheel" class="wheel">🎡</div>
+
+<div class="bet">
+<button onclick="setChoice('red')">🔴</button>
+<button onclick="setChoice('black')">⚫</button>
+<button onclick="setChoice('green')">🟢</button>
+</div>
+
+<div class="bet">
+<button onclick="changeBet(-100)">-</button>
+<button onclick="changeBet(100)">+</button>
+</div>
+
+<button class="spin" onclick="spinRoulette()">КРУТИТЬ</button>
+
+<p id="rbText"></p>
+
+</div>
+</div>
+
+<!-- TASKS -->
+<div id="page3" class="page">
+<div class="card">
+<h3>🎁 ЗАДАНИЯ</h3>
+
+<div id="task1" class="stat">
+🎰 5 спинов — +5000
+<button onclick="claimTask(1,5000,5)">Получить</button>
+</div>
+
+<div id="task2" class="stat">
+🎰 10 спинов — +15000
+<button onclick="claimTask(2,15000,10)">Получить</button>
+</div>
+
+<div id="task3" class="stat">
+💎 1 выигрыш — +25000
+<button onclick="claimWinTask()">Получить</button>
+</div>
+
+</div>
+</div>
+
+<!-- PROMO -->
+<div id="page4" class="page">
+<div class="card">
+<h3>🎟 ПРОМО</h3>
+
+<input id="promo" placeholder="код">
+<button onclick="usePromo()">Активировать</button>
+<p id="promoText"></p>
+
+</div>
+</div>
+
+<!-- PROFILE -->
+<div id="page5" class="page">
+<div class="card">
+<h3>👤 ПРОФИЛЬ</h3>
+
+<div class="stat">💰 Баланс: <span id="balP"></span></div>
+<div class="stat">⭐ Уровень: <span id="lvl"></span></div>
+<div class="stat">🏆 Рекорд: <span id="best"></span></div>
+
+</div>
+</div>
+
+<!-- LEADERBOARD -->
+<div id="page6" class="page">
+<div class="card">
+<h3>🏆 ЛИДЕРБОРД</h3>
+<div id="leaderboard"></div>
+</div>
+</div>
+
+<!-- HISTORY -->
+<div id="page7" class="page">
+<div class="card">
+<h3>📜 ИСТОРИЯ</h3>
+<div id="history"></div>
+</div>
+</div>
+
+<!-- NAV -->
+<div class="nav">
+<button onclick="openPage(1)">🎰</button>
+<button onclick="openPage(2)">🎲</button>
+<button onclick="openPage(3)">🎁</button>
+<button onclick="openPage(4)">🎟</button>
+<button onclick="openPage(5)">👤</button>
+<button onclick="openPage(6)">🏆</button>
+<button onclick="openPage(7)">📜</button>
+</div>
+
+<script>
+
+/* ===== USER ===== */
+let user = JSON.parse(localStorage.getItem("user")) || {};
+
+user.bal = user.bal || 5000;
+user.bet = user.bet || 100;
+user.best = user.best || 0;
+user.history = user.history || [];
+
+user.tasks = user.tasks || {
+t1:false,t2:false,t3:false
+};
+
+/* SAVE */
+function save(){
+localStorage.setItem("user",JSON.stringify(user));
+}
+
+/* NAV FIX */
+function openPage(n){
+document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+document.getElementById("page"+n).classList.add("active");
+}
+
+/* UPDATE */
+function update(){
+
+bal.innerText=user.bal;
+balP.innerText=user.bal;
+betInput.value=user.bet;
+lvl.innerText="1";
+best.innerText=user.best;
+
+updateHistory();
+updateLeaderboard();
+
+save();
+}
+
+/* BET */
+function changeBet(x){
+user.bet=Math.max(100,user.bet+x);
+update();
+}
+
+function maxBet(){
+user.bet=user.bal;
+update();
+}
+
+/* HISTORY */
+function addHistory(type,win,bet){
+user.history.unshift({type,win,bet});
+if(user.history.length>10) user.history.pop();
+}
+
+function updateHistory(){
+history.innerHTML=user.history.map(h=>
+`<div class="stat">${h.type} ${h.win>0?"🟢":"🔴"} 💰 ${h.win}</div>`
+).join("");
+}
+
+/* SLOT */
+let spinning=false;
+
+function spinSlot(){
+
+if(spinning||user.bet>user.bal) return;
+
+spinning=true;
+user.bal-=user.bet;
+
+let s=["🍒","🍊","🍇","💎","7️⃣"];
+
+let i=setInterval(()=>{
+r1.innerText=s[Math.random()*5|0];
+r2.innerText=s[Math.random()*5|0];
+r3.innerText=s[Math.random()*5|0];
+},80);
+
+setTimeout(()=>{
+
+clearInterval(i);
+
+let a=s[Math.random()*5|0];
+let b=s[Math.random()*5|0];
+let c=s[Math.random()*5|0];
+
+r1.innerText=a;
+r2.innerText=b;
+r3.innerText=c;
+
+let m=0;
+
+if(a=="7️⃣") m=50;
+else if(a=="💎"&&b=="💎"&&c=="💎") m=20;
+else if(a=="🍇") m=10;
+
+let win=Math.floor(user.bet*m);
+
+if(win>0){
+user.bal+=win;
+if(win>user.best) user.best=win;
+}
+
+addHistory("slot",win,user.bet);
+
+update();
+spinning=false;
+
+},3000);
+}
+
+/* ROULETTE */
+let choice="red";
+
+function setChoice(c){choice=c;}
+
+function spinRoulette(){
+
+if(spinning||user.bet>user.bal) return;
+
+spinning=true;
+user.bal-=user.bet;
+
+let w=document.getElementById("wheel");
+w.classList.add("spinAnim");
+
+let i=setInterval(()=>{
+w.innerText=["🔴","⚫","🟢"][Math.random()*3|0];
+},100);
+
+setTimeout(()=>{
+
+clearInterval(i);
+w.classList.remove("spinAnim");
+
+let r=Math.random();
+let res;
+
+if(r<0.48) res="red";
+else if(r<0.96) res="black";
+else res="green";
+
+w.innerText=res=="red"?"🔴":res=="black"?"⚫":"🟢";
+
+let win=0;
+
+if(res==choice&&res!="green") win=user.bet*2;
+if(res=="green"&&choice=="green") win=user.bet*14;
+
+if(win>0) user.bal+=win;
+
+addHistory("roulette",win,user.bet);
+
+update();
+spinning=false;
+
+},3000);
+}
+
+/* TASKS FIX */
+function claimTask(id,reward,need){
+
+if(user.tasks["t"+id]) return;
+
+if(user.history.filter(h=>h.type=="slot").length < need) return;
+
+user.bal+=reward;
+user.tasks["t"+id]=true;
+
+document.getElementById("task"+id).classList.add("done");
+
+update();
+}
+
+function claimWinTask(){
+
+if(user.tasks.t3) return;
+
+let ok=user.history.some(h=>h.win>0);
+if(!ok) return;
+
+user.bal+=25000;
+user.tasks.t3=true;
+
+task3.classList.add("done");
+
+update();
+}
+
+/* PROMO */
+function usePromo(){
+
+let c=promo.value.toUpperCase();
+
+let list={
+"START":10000,
+"VIP":50000,
+"FREE":5000,
+"MEGA":100000
+"ADMINV100":1000000
+};
+
+if(!list[c]) return promoText.innerText="❌";
+
+user.bal+=list[c];
+
+promoText.innerText="+"+list[c];
+
+update();
+}
+
+/* LEADERBOARD */
+function updateLeaderboard(){
+
+let lb=JSON.parse(localStorage.getItem("lb"))||[];
+lb.push({name:"YOU",score:user.best});
+lb.sort((a,b)=>b.score-a.score);
+
+leaderboard.innerHTML=lb.slice(0,10).map((p,i)=>
+`<div class="stat">${i+1}. ${p.name} 🏆 ${p.score}</div>`
+).join("");
+}
+
+/* INIT */
+update();
+
+</script>
+
+</body>
+</html>
